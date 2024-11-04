@@ -1,0 +1,46 @@
+{
+  "UP9YLF": {
+    "name": "Calvin Doesn't Nut",
+    "code": "UP9YLF",
+    "creator": "Cayson Brown",
+    "members": [
+      {
+        "username": "Cayson Brown",
+        "streak": 1,
+        "lastCheckIn": "2024-11-04T18:56:12.625Z"
+      },
+      {
+        "username": "tester",
+        "streak": 0,
+        "lastCheckIn": "2024-11-04T20:40:29.393Z"
+      }
+    ],
+    "createdAt": "2024-11-04T18:55:38.014Z"
+  },
+  "GP39JF": {
+    "name": "Cuties Don't Nut",
+    "code": "GP39JF",
+    "creator": "Cayson",
+    "members": [
+      {
+        "username": "Cayson",
+        "streak": 1,
+        "lastCheckIn": "2024-11-04T18:57:33.294Z"
+      }
+    ],
+    "createdAt": "2024-11-04T18:57:18.817Z"
+  },
+  "EHKHPV": {
+    "name": "Admins Unite",
+    "code": "EHKHPV",
+    "creator": "admin",
+    "members": [
+      {
+        "username": "admin",
+        "streak": 1,
+        "lastCheckIn": "2024-11-04T21:38:57.250Z"
+      }
+    ],
+    "createdAt": "2024-11-04T21:38:47.622Z"
+  }
+}

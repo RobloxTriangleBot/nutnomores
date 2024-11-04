@@ -1,0 +1,561 @@
+/* Add theme variables */
+:root {
+    --dashboard-bg: #f5f5f5;
+    --box-bg: white;
+    --text-color: #333;
+    --text-secondary: #666;
+    --border-color: #ddd;
+    --section-bg: #f8f9fa;
+    --header-bg: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] {
+    --dashboard-bg: #1a1a1a;
+    --box-bg: #2d2d2d;
+    --text-color: #ffffff;
+    --text-secondary: #cccccc;
+    --border-color: #404040;
+    --section-bg: #363636;
+    --header-bg: rgba(45, 45, 45, 0.9);
+}
+
+/* Update existing styles with variables */
+body {
+    background-color: var(--dashboard-bg);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.dashboard-container {
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+    margin-top: 60px;
+}
+
+.dashboard-box {
+    background: var(--box-bg);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.group-info {
+    margin: 30px 0;
+    padding: 20px;
+    background: var(--section-bg);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.code-container {
+    margin: 20px 0;
+    padding: 15px;
+    background: var(--box-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--text-color);
+}
+
+.copy-code {
+    font-family: monospace;
+    font-size: 1.2em;
+    color: #28a745;
+    padding: 5px 10px;
+    background: var(--section-bg);
+    border-radius: 4px;
+}
+
+.copy-button {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.copy-button:hover {
+    background: #218838;
+}
+
+.members-list {
+    list-style: none;
+    padding: 0;
+}
+
+.members-list li {
+    padding: 15px;
+    margin: 10px 0;
+    background: var(--section-bg);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-color);
+}
+
+.member-number {
+    width: 24px;
+    height: 24px;
+    background: #4285f4;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+}
+
+.user-header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--header-bg);
+    border-bottom-left-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.logout-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+    background-color: #c82333;
+}
+
+#userDisplay {
+    color: var(--text-color);
+}
+
+/* Add these new styles */
+.check-in-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.check-in-modal.show {
+    display: flex;
+}
+
+.check-in-content {
+    background: var(--box-bg);
+    color: var(--text-color);
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    text-align: center;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.bible-verse {
+    margin: 20px 0;
+    padding: 20px;
+    background: var(--section-bg);
+    border-radius: 8px;
+    font-style: italic;
+    color: var(--text-color);
+}
+
+.check-in-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.yes-button, .no-button {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+.yes-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.no-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.countdown-timer {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* Add streak display to member list items */
+.member-streak {
+    margin-left: auto;
+    background: #4285f4;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+}
+
+/* Add these new styles */
+.next-checkin-info {
+    margin: 20px 0;
+    padding: 15px;
+    background: var(--section-bg);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.checkin-status {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#statusMessage {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.countdown-timer {
+    color: #4285f4;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+/* Update the existing countdown-timer style in the modal */
+.check-in-modal .countdown-timer {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* Add these new styles */
+.failures-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: var(--section-bg);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.failures-button {
+    background-color: #6c757d;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.failures-button:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+.failures-display {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 5px;
+    background: var(--box-bg);
+    display: none;
+}
+
+.failures-display.show {
+    display: block;
+}
+
+.failure-item {
+    padding: 10px;
+    margin: 5px 0;
+    background: var(--section-bg);
+    border-radius: 5px;
+    color: #dc3545;
+}
+
+.no-failures {
+    color: #28a745;
+    font-weight: 500;
+    padding: 10px;
+}
+
+/* Headers */
+h1, h2, h3 {
+    color: var(--text-color);
+}
+
+/* Update the countdown display */
+.countdown-timer {
+    color: #4285f4;
+}
+
+/* Keep button colors as they are for good contrast */
+.copy-button, .yes-button, .no-button, .failures-button {
+    /* Original colors maintained for visibility */
+}
+
+/* Add transition for smooth theme switching */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Add these new styles for notifications */
+.notification-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+}
+
+.notification {
+    background: var(--box-bg);
+    color: var(--text-color);
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 300px;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.3s ease;
+    border-left: 4px solid #4285f4;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.notification.fade-out {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+/* Add milestone box styles */
+.milestone-box {
+    background: var(--box-bg);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+}
+
+.milestone-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 15px;
+    background: var(--section-bg);
+    border-radius: 8px;
+}
+
+.milestone-badge {
+    font-size: 3em;
+    background: var(--box-bg);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.milestone-info {
+    flex: 1;
+}
+
+.milestone-info h3 {
+    color: var(--text-color);
+    margin-bottom: 5px;
+    font-size: 1.4em;
+}
+
+.milestone-info p {
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.streak-progress {
+    font-size: 1.1em;
+    color: #4285f4;
+    font-weight: bold;
+}
+
+#streakCount {
+    font-size: 1.3em;
+}
+
+/* Add these new layout styles */
+.dashboard-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-box {
+    flex: 3;
+}
+
+.right-side-content {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 20px;
+}
+
+.milestone-box {
+    background: var(--box-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+}
+
+.progress-box {
+    background: var(--box-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    margin-top: 0;
+    position: static;
+}
+
+.milestone-content {
+    padding: 15px;
+    background: var(--section-bg);
+    border-radius: 8px;
+}
+
+.milestone-info p {
+    font-size: 0.95em;
+    line-height: 1.5;
+    max-width: none;
+    white-space: normal;
+}
+
+.milestone-info h3 {
+    font-size: 1.3em;
+    margin-bottom: 8px;
+    white-space: nowrap;
+}
+
+/* Update responsive design */
+@media (max-width: 1024px) {
+    .dashboard-layout {
+        flex-direction: column;
+    }
+
+    .right-side-content {
+        width: 100%;
+        position: static;
+    }
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: var(--text-color);
+    font-size: 0.9em;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 10px;
+    background: var(--box-bg);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #4285f4, #357abd);
+    transition: width 0.5s ease;
+}
+
+/* Update progress box styles */
+.progress-box {
+    background: var(--box-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+}
+
+.milestone-progress {
+    background: var(--section-bg);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: var(--text-color);
+    font-size: 0.9em;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 10px;
+    background: var(--box-bg);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #4285f4, #357abd);
+    transition: width 0.5s ease;
+}

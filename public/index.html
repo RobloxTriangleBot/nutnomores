@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nut No More - Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="notificationContainer" class="notification-container">
+        <!-- Notifications will be added here dynamically -->
+    </div>
+    <div class="login-container">
+        <!-- Quote box stays at top -->
+        <div class="quote-box">
+            <h3>Quote of the Day</h3>
+            <div id="dailyQuote" class="quote-content">
+                <p id="quoteText"></p>
+                <p id="quoteAuthor" class="quote-author"></p>
+            </div>
+        </div>
+
+        <!-- Main content row -->
+        <div class="main-row">
+            <!-- Failures box -->
+            <div class="stat-box fail-box">
+                <h3>😔 Today's Fails</h3>
+                <div class="stat-count" id="failCount">0</div>
+                <div class="live-indicator">LIVE</div>
+            </div>
+
+            <!-- Main login box -->
+            <div class="login-box">
+                <h1><span class="peanut">🥜</span>Nut No More<span class="peanut">🥜</span></h1>
+                <p class="subtitle">Your Journey to Freedom Starts Here</p>
+                
+                <!-- Main Buttons -->
+                <div class="main-buttons">
+                    <button class="join-button" id="joinGroupBtn">👥 Join a Group</button>
+                    <button class="create-group-button" id="createGroupBtn">✨ Create New Group</button>
+                    <button class="login-button" id="returningBtn">👋 Already Have an Account?</button>
+                </div>
+
+                <!-- Credit Line -->
+                <p class="credit">Made with ❤️ by Cayson</p>
+
+                <!-- Join Group Modal -->
+                <div id="joinGroupModal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-modal">&times;</button>
+                        <h2>👥 Join a Group</h2>
+                        <form id="loginForm">
+                            <input type="text" name="username" placeholder="👤 Username" required>
+                            <input type="text" name="groupCode" placeholder="🔑 Group Code" required>
+                            <button type="submit" class="submit-button">Join Group 🚀</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Create Group Modal -->
+                <div id="createGroupModal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-modal">&times;</button>
+                        <h2>✨ Create New Group</h2>
+                        <form id="createGroupForm">
+                            <input type="text" name="username" placeholder="👤 Username" required>
+                            <input type="text" name="groupName" placeholder="✏️ Group Name" required>
+                            <button type="submit" class="submit-button">Create Group 🚀</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Returning User Modal -->
+                <div id="returningUserModal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-modal">&times;</button>
+                        <h2>👋 Welcome Back!</h2>
+                        <form id="returningUserForm">
+                            <input type="text" name="username" placeholder="👤 Username" required>
+                            <input type="text" name="userCode" placeholder="🔑 Your Secret Code" required>
+                            <button type="submit" class="submit-button">Login 🚀</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Credits Button -->
+                <button class="credits-button" id="creditsBtn">⭐ Credits</button>
+
+                <!-- Credits Modal -->
+                <div id="creditsModal" class="modal">
+                    <div class="modal-content credits-content">
+                        <button class="close-modal">&times;</button>
+                        <h2>⭐ Credits</h2>
+                        
+                        <div class="credits-section">
+                            <h3>🏆 Title Name</h3>
+                            <p>Gifted by Jacob Anderson</p>
+                        </div>
+
+                        <div class="credits-section">
+                            <h3>🌟 Friends That Motivated Me</h3>
+                            <ul class="credits-list">
+                                <li>✨ Jacob Anderson</li>
+                                <li>✨ Tyler Kempton</li>
+                                <!-- Space for more names -->
+                            </ul>
+                        </div>
+
+                        <div class="credits-section">
+                            <h3>👨‍💻 Developer</h3>
+                            <p>Made by Cayson</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add this new modal after your other modals -->
+                <div id="successModal" class="modal">
+                    <div class="modal-content success-content">
+                        <h2>🎉 Welcome to Nut No More!</h2>
+                        <p class="success-message">Your account has been created successfully.</p>
+                        
+                        <div class="secret-code-box">
+                            <p>Your Secret Code (save this!):</p>
+                            <div class="code-display">
+                                <code id="secretCode">Loading...</code>
+                                <button id="copySecretCode" class="copy-button">Copy</button>
+                            </div>
+                        </div>
+
+                        <p class="code-warning">⚠️ Make sure to save this code! You'll need it to log back in.</p>
+                        
+                        <button id="continueToLobby" class="submit-button">Continue to Lobby</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success box -->
+            <div class="stat-box success-box">
+                <h3>💪 Today's Victories</h3>
+                <div class="stat-count" id="successCount">0</div>
+                <div class="live-indicator">LIVE</div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script src="notifications.js"></script>
+    <script src="quotes.js"></script>
+    <!-- Dark Mode Toggle -->
+    <button id="darkModeToggle" class="dark-mode-toggle">
+        <span class="light-icon">🌞</span>
+        <span class="dark-icon">🌙</span>
+    </button>
+</body>
+</html> 

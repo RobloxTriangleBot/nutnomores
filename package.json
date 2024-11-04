@@ -1,0 +1,12 @@
+{
+  "name": "nut-no-more",
+  "version": "1.0.0",
+  "description": "A mental health and habit-tracking app",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

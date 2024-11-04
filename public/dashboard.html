@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nut No More - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div id="notificationContainer" class="notification-container">
+        <!-- Notifications will be added here dynamically -->
+    </div>
+
+    <div class="user-header">
+        <span id="userDisplay">Welcome, <strong id="username">...</strong></span>
+        <button id="logoutBtn" class="logout-button">Logout</button>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="dashboard-layout">
+            <div class="dashboard-box">
+                <h1>Group Leaderboard</h1>
+                
+                <div class="group-info">
+                    <h2 id="groupName">Loading group name...</h2>
+                    <div class="code-container">
+                        <span>Group Code: </span>
+                        <code id="groupCode" class="copy-code">Loading...</code>
+                        <button id="copyBtn" class="copy-button">Copy</button>
+                    </div>
+                </div>
+
+                <div class="next-checkin-info">
+                    <h3>Daily Check-in Status</h3>
+                    <div id="checkInStatus" class="checkin-status">
+                        <span id="statusMessage">Loading status...</span>
+                        <div id="countdownTimer" class="countdown-timer"></div>
+                    </div>
+                </div>
+
+                <div class="leaderboard">
+                    <h3>Members</h3>
+                    <ul id="membersList" class="members-list">
+                        <!-- Members will be added here dynamically -->
+                    </ul>
+                </div>
+
+                <div class="failures-section">
+                    <button id="showFailuresBtn" class="failures-button">
+                        Show Today's Failures
+                    </button>
+                    <div id="failuresDisplay" class="failures-display">
+                        <!-- Failures will be shown here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-side-content">
+                <div class="milestone-box">
+                    <h2>Current Milestone</h2>
+                    <div class="milestone-content" id="milestoneDisplay">
+                        <div class="milestone-badge">
+                            <span id="milestoneEmoji">🌱</span>
+                        </div>
+                        <div class="milestone-info">
+                            <h3 id="milestoneTitle">Loading...</h3>
+                            <p id="milestoneDescription">Loading...</p>
+                            <div class="streak-progress">
+                                <span id="streakCount">0</span> days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-box">
+                    <h2>Next Milestone Progress</h2>
+                    <div class="milestone-progress">
+                        <div class="progress-info">
+                            <span id="nextMilestoneTitle">Loading...</span>
+                            <span id="progressDays">0/0 days</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="progressBar" class="progress-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="checkInModal" class="check-in-modal">
+        <div class="check-in-content">
+            <button id="closeCheckIn" class="close-button">&times;</button>
+            <h2>Did you stay committed today?</h2>
+            <div class="bible-verse">
+                <p id="bibleVerse"></p>
+                <p id="verseReference"></p>
+            </div>
+            <div id="checkInButtons" class="check-in-buttons">
+                <button id="yesButton" class="yes-button">Yes</button>
+                <button id="noButton" class="no-button">No</button>
+            </div>
+            <div id="countdownTimer" class="countdown-timer"></div>
+        </div>
+    </div>
+
+    <script>
+        document.documentElement.setAttribute('data-theme', 
+            localStorage.getItem('theme') || 'light'
+        );
+    </script>
+
+    <button id="darkModeToggle" class="dark-mode-toggle">
+        <span class="light-icon">🌞</span>
+        <span class="dark-icon">🌙</span>
+    </button>
+
+    <script src="dashboard.js"></script>
+    <script src="notifications.js"></script>
+</body>
+</html> 
