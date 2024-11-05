@@ -222,8 +222,11 @@ app.get('/api/checkin-status/:groupCode/:username', async (req, res) => {
 
         const now = new Date();
         const lastCheckIn = member.lastCheckIn ? new Date(member.lastCheckIn) : null;
-        const canCheckIn = !lastCheckIn || 
-            now.toLocaleDateString() !== lastCheckIn.toLocaleDateString();
+        
+        // Compare dates without time
+        const today = new Date().setHours(0, 0, 0, 0);
+        const lastCheckInDate = lastCheckIn ? new Date(lastCheckIn).setHours(0, 0, 0, 0) : null;
+        const canCheckIn = !lastCheckIn || lastCheckInDate < today;
 
         res.json({
             canCheckIn,
@@ -282,12 +285,12 @@ app.get('/api/failures/:groupCode', async (req, res) => {
             return res.status(404).json({ error: 'Group not found' });
         }
 
-        const today = new Date().toLocaleDateString();
+        const today = new Date().setHours(0, 0, 0, 0);
         const members = group.get("members") || [];
         
         const failures = members.filter(member => {
             if (!member.lastCheckIn) return false;
-            const checkInDate = new Date(member.lastCheckIn).toLocaleDateString();
+            const checkInDate = new Date(member.lastCheckIn).setHours(0, 0, 0, 0);
             return checkInDate === today && member.streak === 0;
         }).map(member => member.username);
 
