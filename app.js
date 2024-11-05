@@ -20,6 +20,17 @@ app.use(express.static('public'));
 const Group = Parse.Object.extend("Group");
 const CustomUser = Parse.Object.extend("CustomUser");
 
+// Add this helper function at the top of app.js
+function isNewDay(lastTime) {
+    if (!lastTime) return true;
+    
+    const now = new Date();
+    const last = new Date(lastTime);
+    
+    // Reset happens at midnight local time
+    return now.toLocaleDateString() !== last.toLocaleDateString();
+}
+
 // Create a new group
 app.post('/api/groups', async (req, res) => {
     try {
@@ -220,22 +231,21 @@ app.get('/api/checkin-status/:groupCode/:username', async (req, res) => {
             return res.status(404).json({ error: 'Member not found' });
         }
 
-        // Get current date at midnight
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        
-        // Get last check-in date at midnight
-        const lastCheckIn = member.lastCheckIn ? new Date(member.lastCheckIn) : null;
-        const lastCheckInDay = lastCheckIn ? 
-            new Date(lastCheckIn.getFullYear(), lastCheckIn.getMonth(), lastCheckIn.getDate()).getTime() : null;
+        // Check if it's a new day since last check-in
+        const canCheckIn = isNewDay(member.lastCheckIn);
 
-        // Can check in if never checked in or last check-in was before today
-        const canCheckIn = !lastCheckInDay || lastCheckInDay < today;
+        // Calculate time until next check-in
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+        const timeUntilReset = tomorrow - now;
 
         res.json({
             canCheckIn,
             lastCheckIn: member.lastCheckIn,
-            streak: member.streak || 0
+            streak: member.streak || 0,
+            nextReset: timeUntilReset
         });
     } catch (error) {
         console.error('Error getting check-in status:', error);
@@ -246,12 +256,10 @@ app.get('/api/checkin-status/:groupCode/:username', async (req, res) => {
 // Get daily stats
 app.get('/api/daily-stats', async (req, res) => {
     try {
-        // Get current date at midnight
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        
         let failures = 0;
         let successes = 0;
+        const now = new Date();
+        const today = now.toLocaleDateString();
 
         const query = new Parse.Query(Group);
         const groups = await query.find();
@@ -261,15 +269,8 @@ app.get('/api/daily-stats', async (req, res) => {
             members.forEach(member => {
                 if (!member.lastCheckIn) return;
                 
-                // Get check-in date at midnight
-                const checkIn = new Date(member.lastCheckIn);
-                const checkInDay = new Date(
-                    checkIn.getFullYear(), 
-                    checkIn.getMonth(), 
-                    checkIn.getDate()
-                ).getTime();
-                
-                if (checkInDay === today) {
+                const checkInDate = new Date(member.lastCheckIn).toLocaleDateString();
+                if (checkInDate === today) {
                     if (member.streak === 0) {
                         failures++;
                     } else {
@@ -279,7 +280,17 @@ app.get('/api/daily-stats', async (req, res) => {
             });
         });
 
-        res.json({ failures, successes });
+        // Calculate time until next reset
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+        const timeUntilReset = tomorrow - now;
+
+        res.json({ 
+            failures, 
+            successes,
+            nextReset: timeUntilReset
+        });
     } catch (error) {
         console.error('Error getting daily stats:', error);
         res.status(500).json({ error: 'Error getting daily stats' });
@@ -299,24 +310,13 @@ app.get('/api/failures/:groupCode', async (req, res) => {
             return res.status(404).json({ error: 'Group not found' });
         }
 
-        // Get current date at midnight
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        
+        const today = new Date().toLocaleDateString();
         const members = group.get("members") || [];
         
         const failures = members.filter(member => {
             if (!member.lastCheckIn) return false;
-            
-            // Get check-in date at midnight
-            const checkIn = new Date(member.lastCheckIn);
-            const checkInDay = new Date(
-                checkIn.getFullYear(), 
-                checkIn.getMonth(), 
-                checkIn.getDate()
-            ).getTime();
-            
-            return checkInDay === today && member.streak === 0;
+            const checkInDate = new Date(member.lastCheckIn).toLocaleDateString();
+            return checkInDate === today && member.streak === 0;
         }).map(member => member.username);
 
         res.json({ failures });
