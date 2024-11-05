@@ -1,296 +1,309 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
+const Parse = require('parse/node');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-// Middleware to parse JSON bodies
+// Initialize Parse with your Back4App credentials
+Parse.initialize(
+    "SUuX9hMwPATJ3nj44E5ulsyeDkJycuatmLlnhiuJ",  // Application ID
+    "BiJOsTCGhK6nZl8uUKZRoEl13pnc2aisOOqGhA0B",  // JavaScript key
+    "pAyQ7MKLmiFeQdXjHYZLke7KHYN5YtuR4M4xmNhf"   // Master key
+);
+Parse.serverURL = 'https://parseapi.back4app.com/';
+
+// Middleware
 app.use(express.json());
 app.use(express.static('public'));
 
-// File paths for persistent storage
-const DATA_DIR = path.join(__dirname, 'data');
-const GROUPS_FILE = path.join(DATA_DIR, 'groups.json');
-const USERS_FILE = path.join(DATA_DIR, 'users.json');
-
-// Create data directory if it doesn't exist
-if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR);
-}
-
-// Load or initialize data
-let groups = new Map();
-let users = new Map();
-
-// Load existing data
-try {
-    if (fs.existsSync(GROUPS_FILE)) {
-        const groupsData = JSON.parse(fs.readFileSync(GROUPS_FILE, 'utf8'));
-        groups = new Map(Object.entries(groupsData));
-    }
-    if (fs.existsSync(USERS_FILE)) {
-        const usersData = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
-        users = new Map(Object.entries(usersData));
-    }
-} catch (error) {
-    console.error('Error loading data:', error);
-}
-
-// Function to save data to files
-const saveData = () => {
-    try {
-        const groupsObj = Object.fromEntries(groups);
-        const usersObj = Object.fromEntries(users);
-
-        fs.writeFileSync(GROUPS_FILE, JSON.stringify(groupsObj, null, 2));
-        fs.writeFileSync(USERS_FILE, JSON.stringify(usersObj, null, 2));
-    } catch (error) {
-        console.error('Error saving data:', error);
-    }
-};
+// Create Parse Objects for our data
+const Group = Parse.Object.extend("Group");
+const CustomUser = Parse.Object.extend("CustomUser");
 
 // Create a new group
-app.post('/api/groups', (req, res) => {
-    const { username, groupName } = req.body;
-    const groupCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    
-    groups.set(groupCode, {
-        name: groupName,
-        code: groupCode,
-        creator: username,
-        members: [{
-            username,
-            streak: 0,
-            lastCheckIn: null
-        }],
-        createdAt: new Date()
-    });
+app.post('/api/groups', async (req, res) => {
+    try {
+        const { username, groupName } = req.body;
+        const groupCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        
+        const group = new Group();
+        await group.save({
+            name: groupName,
+            code: groupCode,
+            creator: username,
+            members: [{
+                username,
+                streak: 0,
+                lastCheckIn: null
+            }]
+        });
 
-    saveData();
-    res.json({ groupCode });
+        res.json({ groupCode });
+    } catch (error) {
+        console.error('Error creating group:', error);
+        res.status(500).json({ error: 'Error creating group' });
+    }
 });
 
 // Join an existing group
-app.post('/api/groups/join', (req, res) => {
-    const { username, groupCode } = req.body;
-    
-    if (!groups.has(groupCode)) {
-        return res.status(404).json({ error: 'Group not found' });
-    }
+app.post('/api/groups/join', async (req, res) => {
+    try {
+        const { username, groupCode } = req.body;
+        
+        const query = new Parse.Query(Group);
+        query.equalTo("code", groupCode);
+        const group = await query.first();
+        
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
 
-    const group = groups.get(groupCode);
-    
-    const existingMember = group.members.find(m => m.username === username);
-    if (existingMember) {
-        return res.json({ 
-            success: true, 
-            groupName: group.name,
-            groupCode: groupCode
-        });
+        const members = group.get("members") || [];
+        const existingMember = members.find(m => m.username === username);
+        
+        if (!existingMember) {
+            members.push({
+                username,
+                streak: 0,
+                lastCheckIn: null
+            });
+            await group.save({ members });
+        }
+
+        res.json({ success: true, groupName: group.get("name") });
+    } catch (error) {
+        console.error('Error joining group:', error);
+        res.status(500).json({ error: 'Error joining group' });
     }
-    
-    group.members.push({
-        username,
-        streak: 0,
-        lastCheckIn: null
-    });
-    
-    saveData();
-    res.json({ 
-        success: true, 
-        groupName: group.name,
-        groupCode: groupCode
-    });
 });
 
 // Create a new user
-app.post('/api/users/create', (req, res) => {
-    const { username } = req.body;
-    
-    // Check if user already exists
-    for (const [existingCode, user] of users.entries()) {
-        if (user.username === username) {
-            // Return existing user code
-            return res.json({ userCode: existingCode });
+app.post('/api/users/create', async (req, res) => {
+    try {
+        const { username } = req.body;
+        
+        const query = new Parse.Query(CustomUser);
+        query.equalTo("username", username);
+        const existingUser = await query.first();
+        
+        if (existingUser) {
+            return res.json({ 
+                userCode: existingUser.get("code"),
+                username: existingUser.get("username")
+            });
         }
-    }
-    
-    // Create new user only if they don't exist
-    const userCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    users.set(userCode, {
-        username,
-        code: userCode,
-        createdAt: new Date()
-    });
 
-    saveData(); // Save after modification
-    res.json({ userCode });
+        const userCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const user = new CustomUser();
+        await user.save({
+            username,
+            code: userCode
+        });
+
+        res.json({ userCode, username });
+    } catch (error) {
+        console.error('Error creating user:', error);
+        res.status(500).json({ error: 'Error creating user' });
+    }
 });
 
+// Add these endpoints after your existing ones
+
 // Verify a user
-app.post('/api/users/verify', (req, res) => {
-    const { username, userCode } = req.body;
-    
-    if (!users.has(userCode)) {
-        return res.status(404).json({ error: 'User not found' });
-    }
-
-    const user = users.get(userCode);
-    if (user.username !== username) {
-        return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    // Find the group this user belongs to
-    let userGroupCode = null;
-    for (const [groupCode, group] of groups.entries()) {
-        if (group.members.some(member => member.username === username)) {
-            userGroupCode = groupCode;
-            break;
+app.post('/api/users/verify', async (req, res) => {
+    try {
+        const { username, userCode } = req.body;
+        
+        const query = new Parse.Query(CustomUser);
+        query.equalTo("username", username);
+        const user = await query.first();
+        
+        if (!user || user.get("code") !== userCode) {
+            return res.status(401).json({ error: 'Invalid credentials' });
         }
-    }
 
-    res.json({ 
-        success: true, 
-        username: user.username,
-        groupCode: userGroupCode
-    });
+        // Find user's group
+        const groupQuery = new Parse.Query(Group);
+        groupQuery.equalTo("members.username", username);
+        const group = await groupQuery.first();
+
+        res.json({ 
+            success: true, 
+            username: user.get("username"),
+            userCode: user.get("code"),
+            groupCode: group ? group.get("code") : null
+        });
+    } catch (error) {
+        console.error('Error verifying user:', error);
+        res.status(500).json({ error: 'Error verifying user' });
+    }
 });
 
 // Get group data
-app.get('/api/groups/:groupCode', (req, res) => {
-    const { groupCode } = req.params;
-    
-    if (!groups.has(groupCode)) {
-        return res.status(404).json({ error: 'Group not found' });
-    }
+app.get('/api/groups/:groupCode', async (req, res) => {
+    try {
+        const { groupCode } = req.params;
+        
+        const query = new Parse.Query(Group);
+        query.equalTo("code", groupCode);
+        const group = await query.first();
+        
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
 
-    const group = groups.get(groupCode);
-    res.json(group);
+        res.json({
+            name: group.get("name"),
+            code: group.get("code"),
+            creator: group.get("creator"),
+            members: group.get("members")
+        });
+    } catch (error) {
+        console.error('Error getting group:', error);
+        res.status(500).json({ error: 'Error getting group' });
+    }
 });
 
-// Add new endpoint for daily check-in
-app.post('/api/checkin', (req, res) => {
-    const { username, groupCode, committed } = req.body;
-    
-    if (!groups.has(groupCode)) {
-        return res.status(404).json({ error: 'Group not found' });
+// Check-in endpoint
+app.post('/api/checkin', async (req, res) => {
+    try {
+        const { username, groupCode, committed } = req.body;
+        
+        const query = new Parse.Query(Group);
+        query.equalTo("code", groupCode);
+        const group = await query.first();
+        
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+
+        const members = group.get("members") || [];
+        const memberIndex = members.findIndex(m => m.username === username);
+        
+        if (memberIndex === -1) {
+            return res.status(404).json({ error: 'Member not found' });
+        }
+
+        // Update member's streak
+        if (committed) {
+            members[memberIndex].streak = (members[memberIndex].streak || 0) + 1;
+        } else {
+            members[memberIndex].streak = 0;
+        }
+        members[memberIndex].lastCheckIn = new Date();
+
+        await group.save({ members });
+        res.json({ success: true, streak: members[memberIndex].streak });
+    } catch (error) {
+        console.error('Error during check-in:', error);
+        res.status(500).json({ error: 'Error during check-in' });
     }
-
-    const group = groups.get(groupCode);
-    const member = group.members.find(m => m.username === username);
-    
-    if (!member) {
-        return res.status(404).json({ error: 'Member not found' });
-    }
-
-    const now = new Date();
-    member.lastCheckIn = now;
-
-    if (committed) {
-        member.streak += 1;
-    } else {
-        member.streak = 0;
-    }
-
-    saveData();
-    res.json({ success: true, streak: member.streak });
 });
 
-// Add endpoint to get check-in status
-app.get('/api/checkin-status/:groupCode/:username', (req, res) => {
-    const { groupCode, username } = req.params;
-    
-    if (!groups.has(groupCode)) {
-        return res.status(404).json({ error: 'Group not found' });
+// Get check-in status
+app.get('/api/checkin-status/:groupCode/:username', async (req, res) => {
+    try {
+        const { groupCode, username } = req.params;
+        
+        const query = new Parse.Query(Group);
+        query.equalTo("code", groupCode);
+        const group = await query.first();
+        
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+
+        const members = group.get("members") || [];
+        const member = members.find(m => m.username === username);
+        
+        if (!member) {
+            return res.status(404).json({ error: 'Member not found' });
+        }
+
+        const now = new Date();
+        const lastCheckIn = member.lastCheckIn ? new Date(member.lastCheckIn) : null;
+        const canCheckIn = !lastCheckIn || 
+            now.toLocaleDateString() !== lastCheckIn.toLocaleDateString();
+
+        res.json({
+            canCheckIn,
+            lastCheckIn: member.lastCheckIn,
+            streak: member.streak || 0
+        });
+    } catch (error) {
+        console.error('Error getting check-in status:', error);
+        res.status(500).json({ error: 'Error getting check-in status' });
     }
-
-    const group = groups.get(groupCode);
-    const member = group.members.find(m => m.username === username);
-    
-    if (!member) {
-        return res.status(404).json({ error: 'Member not found' });
-    }
-
-    const now = new Date();
-    const lastCheckIn = member.lastCheckIn ? new Date(member.lastCheckIn) : null;
-    
-    // Check if last check-in was on a different day in user's timezone
-    const canCheckIn = !lastCheckIn || 
-        now.toLocaleDateString() !== new Date(lastCheckIn).toLocaleDateString();
-
-    res.json({
-        canCheckIn,
-        lastCheckIn: member.lastCheckIn,
-        streak: member.streak
-    });
 });
 
-// Serve the index.html file
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// Get daily stats
+app.get('/api/daily-stats', async (req, res) => {
+    try {
+        const today = new Date().toLocaleDateString();
+        let failures = 0;
+        let successes = 0;
 
-// Add this route to clear all data
-app.post('/api/clear-data', (req, res) => {
-    // Clear the Maps
-    groups = new Map();
-    users = new Map();
-    
-    // Clear the files
-    fs.writeFileSync(GROUPS_FILE, JSON.stringify({}));
-    fs.writeFileSync(USERS_FILE, JSON.stringify({}));
-    
-    res.json({ success: true, message: 'All data cleared' });
-});
+        const query = new Parse.Query(Group);
+        const groups = await query.find();
 
-// Add this new endpoint to check today's failures
-app.get('/api/failures/:groupCode', (req, res) => {
-    const { groupCode } = req.params;
-    
-    if (!groups.has(groupCode)) {
-        return res.status(404).json({ error: 'Group not found' });
+        groups.forEach(group => {
+            const members = group.get("members") || [];
+            members.forEach(member => {
+                if (!member.lastCheckIn) return;
+                
+                const checkInDate = new Date(member.lastCheckIn).toLocaleDateString();
+                if (checkInDate === today) {
+                    if (member.streak === 0) {
+                        failures++;
+                    } else {
+                        successes++;
+                    }
+                }
+            });
+        });
+
+        res.json({ failures, successes });
+    } catch (error) {
+        console.error('Error getting daily stats:', error);
+        res.status(500).json({ error: 'Error getting daily stats' });
     }
+});
 
-    const group = groups.get(groupCode);
-    const today = new Date().toLocaleDateString();
-    
-    // Get members who failed today (checked in with "no")
-    const failures = group.members
-        .filter(member => {
+// Update the failures endpoint
+app.get('/api/failures/:groupCode', async (req, res) => {
+    try {
+        const { groupCode } = req.params;
+        
+        const query = new Parse.Query(Group);
+        query.equalTo("code", groupCode);
+        const group = await query.first();
+        
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+
+        const today = new Date().toLocaleDateString();
+        const members = group.get("members") || [];
+        
+        const failures = members.filter(member => {
             if (!member.lastCheckIn) return false;
             const checkInDate = new Date(member.lastCheckIn).toLocaleDateString();
             return checkInDate === today && member.streak === 0;
-        })
-        .map(member => member.username);
+        }).map(member => member.username);
 
-    res.json({ failures });
-});
-
-// Add this new endpoint for daily stats
-app.get('/api/daily-stats', (req, res) => {
-    const today = new Date().toLocaleDateString();
-    let failures = 0;
-    let successes = 0;
-
-    // Count today's failures and successes across all groups
-    for (const [_, group] of groups) {
-        for (const member of group.members) {
-            if (!member.lastCheckIn) continue;
-            
-            const checkInDate = new Date(member.lastCheckIn).toLocaleDateString();
-            if (checkInDate === today) {
-                if (member.streak === 0) {
-                    failures++;
-                } else {
-                    successes++;
-                }
-            }
-        }
+        res.json({ failures });
+    } catch (error) {
+        console.error('Error getting failures:', error);
+        res.status(500).json({ error: 'Error getting failures' });
     }
-
-    res.json({ failures, successes });
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running at https://nutnomore4-hrpygg2s.b4a.run/`);
+});
+
+// Handle graceful shutdown
+process.on('SIGINT', async () => {
+    await Parse.User.logOut();
+    process.exit();
 }); 
