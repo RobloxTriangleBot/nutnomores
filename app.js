@@ -220,13 +220,17 @@ app.get('/api/checkin-status/:groupCode/:username', async (req, res) => {
             return res.status(404).json({ error: 'Member not found' });
         }
 
+        // Get current date at midnight
         const now = new Date();
-        const lastCheckIn = member.lastCheckIn ? new Date(member.lastCheckIn) : null;
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
         
-        // Compare dates without time
-        const today = new Date().setHours(0, 0, 0, 0);
-        const lastCheckInDate = lastCheckIn ? new Date(lastCheckIn).setHours(0, 0, 0, 0) : null;
-        const canCheckIn = !lastCheckIn || lastCheckInDate < today;
+        // Get last check-in date at midnight
+        const lastCheckIn = member.lastCheckIn ? new Date(member.lastCheckIn) : null;
+        const lastCheckInDay = lastCheckIn ? 
+            new Date(lastCheckIn.getFullYear(), lastCheckIn.getMonth(), lastCheckIn.getDate()).getTime() : null;
+
+        // Can check in if never checked in or last check-in was before today
+        const canCheckIn = !lastCheckInDay || lastCheckInDay < today;
 
         res.json({
             canCheckIn,
@@ -242,7 +246,10 @@ app.get('/api/checkin-status/:groupCode/:username', async (req, res) => {
 // Get daily stats
 app.get('/api/daily-stats', async (req, res) => {
     try {
-        const today = new Date().toLocaleDateString();
+        // Get current date at midnight
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        
         let failures = 0;
         let successes = 0;
 
@@ -254,8 +261,15 @@ app.get('/api/daily-stats', async (req, res) => {
             members.forEach(member => {
                 if (!member.lastCheckIn) return;
                 
-                const checkInDate = new Date(member.lastCheckIn).toLocaleDateString();
-                if (checkInDate === today) {
+                // Get check-in date at midnight
+                const checkIn = new Date(member.lastCheckIn);
+                const checkInDay = new Date(
+                    checkIn.getFullYear(), 
+                    checkIn.getMonth(), 
+                    checkIn.getDate()
+                ).getTime();
+                
+                if (checkInDay === today) {
                     if (member.streak === 0) {
                         failures++;
                     } else {
@@ -285,13 +299,24 @@ app.get('/api/failures/:groupCode', async (req, res) => {
             return res.status(404).json({ error: 'Group not found' });
         }
 
-        const today = new Date().setHours(0, 0, 0, 0);
+        // Get current date at midnight
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        
         const members = group.get("members") || [];
         
         const failures = members.filter(member => {
             if (!member.lastCheckIn) return false;
-            const checkInDate = new Date(member.lastCheckIn).setHours(0, 0, 0, 0);
-            return checkInDate === today && member.streak === 0;
+            
+            // Get check-in date at midnight
+            const checkIn = new Date(member.lastCheckIn);
+            const checkInDay = new Date(
+                checkIn.getFullYear(), 
+                checkIn.getMonth(), 
+                checkIn.getDate()
+            ).getTime();
+            
+            return checkInDay === today && member.streak === 0;
         }).map(member => member.username);
 
         res.json({ failures });
