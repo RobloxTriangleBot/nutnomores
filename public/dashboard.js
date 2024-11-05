@@ -252,18 +252,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to check today's failures
     async function checkTodayFailures() {
         try {
+            console.log('Checking failures...'); // Debug log
             const response = await fetch(`/api/failures/${groupCode}`);
             const data = await response.json();
+            console.log('Failures data:', data); // Debug log
             
             failuresDisplay.innerHTML = ''; // Clear previous content
             
-            if (data.failures.length === 0) {
+            if (!data.failures || data.failures.length === 0) {
+                console.log('No failures found'); // Debug log
                 failuresDisplay.innerHTML = `
                     <div class="no-failures">
                         🎉 Nobody failed today! Keep going strong!
                     </div>
                 `;
             } else {
+                console.log('Displaying failures:', data.failures); // Debug log
                 data.failures.forEach(failure => {
                     const failureElement = document.createElement('div');
                     failureElement.className = 'failure-item';
